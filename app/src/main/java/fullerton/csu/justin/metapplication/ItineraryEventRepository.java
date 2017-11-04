@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -18,22 +19,14 @@ public class ItineraryEventRepository {
     public ItineraryEventRepository(Context context) {
         this.events = new ArrayList<>();
         db = new ItineraryEventsDB(context);
-        loadEventsFromDB();
     }
 
-    private void loadEventsFromDB() {
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                events = db.getEvents();
-            }
-        };
-
-        Timer timer = new Timer(true);
-        timer.schedule(task,0);
+    public void loadEventsFromDB() {
+        events = db.getEvents();
     }
 
     public ArrayList<ItineraryEvent> getEvents() {
         return events;
     }
+
 }
