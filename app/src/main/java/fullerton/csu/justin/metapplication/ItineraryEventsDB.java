@@ -17,7 +17,7 @@ import java.util.ArrayList;
 public class ItineraryEventsDB {
     //Database name and version constants
     private static final String DB_NAME = "events.db";
-    private static final int    DB_VERSION = 1;
+    private static final int    DB_VERSION = 2;
     private static final String TAG = "Events Database";
 
     // Database and helper objects
@@ -46,7 +46,7 @@ public class ItineraryEventsDB {
     // Create and drop table Constants
     private static final String CREATE_EVENT_TABLE =
             "CREATE TABLE " + EVENT_TABLE + " (" +
-                    EVENT_ID + " INTEGER PRIMARY KEY AUTO INCREMENT, " +
+                    EVENT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     EVENT_TITLE + " TEXT NOT NULL, " +
                     EVENT_DESCRIPTION + " TEXT NOT NULL, " +
                     EVENT_ELAPSED_TIME + " INTEGER NOT NULL, " + "" +
@@ -59,11 +59,11 @@ public class ItineraryEventsDB {
         dbHelper = new DBHelper(context, DB_NAME, null, DB_VERSION);
     }
 
-    private void opeanReadableDB() {
+    private void openReadableDB() {
         db = dbHelper.getReadableDatabase();
     }
 
-    private void opeanWriteableDB() {
+    private void openWriteableDB() {
         db = dbHelper.getWritableDatabase();
     }
 
@@ -76,7 +76,7 @@ public class ItineraryEventsDB {
         String where =
                 EVENT_IS_DELETED + " = 0"; // Get all events that are not deleted
         try {
-            this.opeanReadableDB();
+            this.openReadableDB();
             Cursor cursor = db.query(EVENT_TABLE, null,
                     where, null, null, null, null); //TODO: Order clause
             ArrayList<ItineraryEvent> events = new ArrayList<>();
@@ -84,6 +84,7 @@ public class ItineraryEventsDB {
             while (cursor.moveToNext()) {
                 events.add(getEventFromCursor(cursor));
             }
+            cursor.close();
             return  events;
         } catch (SQLiteException e) {
             Log.d(TAG, "Exception occurred " + e.getMessage());
@@ -103,7 +104,7 @@ public class ItineraryEventsDB {
         long rowID = -1;
 
         try {
-            this.opeanWriteableDB();
+            this.openWriteableDB();
             rowID = db.insert(EVENT_TABLE, null, cv);
         } catch (SQLiteException e) {
             Log.d(TAG, "Exception occurred " + e.getMessage());
@@ -126,7 +127,7 @@ public class ItineraryEventsDB {
         int rowCount = 0;
 
         try {
-            this.opeanWriteableDB();
+            this.openWriteableDB();
              rowCount = db.update(EVENT_TABLE, cv, where, whereArgs);
         } catch (SQLiteException e) {
             Log.d(TAG, "Exception occurred " + e.getMessage());
@@ -166,6 +167,9 @@ public class ItineraryEventsDB {
             db.execSQL(CREATE_EVENT_TABLE);
 
             //Insert sample events;
+            db.execSQL("INSERT INTO event(event_title, event_description, event_elapsed, event_deleted) VALUES('Title','Descr',0,'0')"); //TODO comment out
+            db.execSQL("INSERT INTO event(event_title, event_description, event_elapsed, event_deleted) VALUES('Title2','Descr2',15,'0')"); //TODO comment out
+
         }
 
         @Override
