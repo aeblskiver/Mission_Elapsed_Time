@@ -21,7 +21,7 @@ public class ItineraryEventRepository {
         loadEventsFromDB();
     }
 
-    public void loadEventsFromDB() {
+    private void loadEventsFromDB() {
         TimerTask task = new TimerTask() {
             @Override
             public void run() {

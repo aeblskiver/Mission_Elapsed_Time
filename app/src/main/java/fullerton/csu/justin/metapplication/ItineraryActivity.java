@@ -3,6 +3,9 @@ package fullerton.csu.justin.metapplication;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,15 +25,33 @@ public class ItineraryActivity extends AppCompatActivity {
         repo = new ItineraryEventRepository(this);
         events = repo.getEvents();
 
-        testRepo();
+        //testRepo();
     }
 
-    private void testRepo() {
-        for (ItineraryEvent event : events) {
-            Log.d(TAG, event.getTitle());
-            Log.d(TAG, event.getDescription());
-        }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_itinerary, menu);
+        return true;
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_new:
+                Toast.makeText(this,"New item",Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.menu_set_alarms:
+                Toast.makeText(this,"Alarm set",Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.menu_cancel_alarm:
+                Toast.makeText(this,"Canceled Alarms",Toast.LENGTH_SHORT).show();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+}
+
+
 
 
 //TODO clean up this mess
@@ -49,5 +70,3 @@ public class ItineraryActivity extends AppCompatActivity {
 //        }
 //    }
 
-
-}
