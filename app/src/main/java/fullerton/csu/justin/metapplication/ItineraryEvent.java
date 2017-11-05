@@ -1,10 +1,13 @@
 package fullerton.csu.justin.metapplication;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by Justin on 11/3/2017.
  */
 
-public class ItineraryEvent {
+public class ItineraryEvent implements Parcelable {
     private int id;
     private String title;
     private String description;
@@ -20,6 +23,15 @@ public class ItineraryEvent {
         this.elapsedTime = elapsedTime;
         this.deleted = FALSE;
     }
+
+    public ItineraryEvent(Parcel in) {
+        this.id = in.readInt();
+        this.title = in.readString();
+        this.description = in.readString();
+        this.elapsedTime = in.readInt();
+        this.deleted = in.readString();
+    }
+
     public int getElapsedTime() {
         return elapsedTime;
     }
@@ -58,5 +70,37 @@ public class ItineraryEvent {
 
     public void setDeleted(String deleted) {
         this.deleted = deleted;
+    }
+
+    @Override
+    public String toString() {
+        return title + " " + description;
+    }
+
+    //Parcelable implementation
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+
+        @Override
+        public ItineraryEvent createFromParcel(Parcel in) {
+            return new ItineraryEvent(in);
+        }
+
+        @Override
+        public ItineraryEvent[] newArray(int i) {
+            return new ItineraryEvent[i];
+        }
+    };
+
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel out, int i) {
+        out.writeInt(this.id);
+        out.writeString(this.title);
+        out.writeString(this.description);
+        out.writeInt(this.elapsedTime);
+        out.writeString(this.deleted);
     }
 }

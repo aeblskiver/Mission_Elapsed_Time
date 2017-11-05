@@ -1,6 +1,13 @@
 <resources>
-    <string name="app_name">METApplication</string>
+    <string name="app_name">Mission Elapsed Time</string>
+    <string name="activity_itin_title">My itinerary</string>
     <string name="menu_new_event">New Event</string>
     <string name="menu_set_alarm">Set Alarm</string>
     <string name="menu_cancel_alarm">Cancel Alarm</string>
+    <string name="editTextTitleHint">Title</string>
+    <string name="editTextDescrHint">Description</string>
+    <string name="textViewPickTimeLabel">Pick time offset</string>
+    <string name="menu_save_changes">Save Changes</string>
+    <string name="menu_discard_changes">Discard Changes</string>
+    <string name="menu_delete">Delete</string>
 </resources>
