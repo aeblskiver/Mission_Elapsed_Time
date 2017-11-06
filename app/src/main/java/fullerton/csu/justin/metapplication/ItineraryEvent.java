@@ -11,13 +11,13 @@ public class ItineraryEvent implements Parcelable {
     private int id;
     private String title;
     private String description;
-    private int elapsedTime;
+    private String elapsedTime;
     private String deleted;
 
     public static final String TRUE = "1";
     private static final String FALSE = "0";
 
-    public ItineraryEvent(String title, String description, int elapsedTime) {
+    public ItineraryEvent(String title, String description, String elapsedTime) {
         this.title = title;
         this.description = description;
         this.elapsedTime = elapsedTime;
@@ -28,15 +28,15 @@ public class ItineraryEvent implements Parcelable {
         this.id = in.readInt();
         this.title = in.readString();
         this.description = in.readString();
-        this.elapsedTime = in.readInt();
+        this.elapsedTime = in.readString();
         this.deleted = in.readString();
     }
 
-    public int getElapsedTime() {
+    public String getElapsedTime() {
         return elapsedTime;
     }
 
-    public void setElapsedTime(int elapsedTime) {
+    public void setElapsedTime(String elapsedTime) {
         this.elapsedTime = elapsedTime;
     }
 
@@ -100,7 +100,7 @@ public class ItineraryEvent implements Parcelable {
         out.writeInt(this.id);
         out.writeString(this.title);
         out.writeString(this.description);
-        out.writeInt(this.elapsedTime);
+        out.writeString(this.elapsedTime);
         out.writeString(this.deleted);
     }
 }

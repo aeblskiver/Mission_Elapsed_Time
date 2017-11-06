@@ -49,7 +49,7 @@ public class ItineraryEventsDB {
                     EVENT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     EVENT_TITLE + " TEXT NOT NULL, " +
                     EVENT_DESCRIPTION + " TEXT NOT NULL, " +
-                    EVENT_ELAPSED_TIME + " INTEGER NOT NULL, " + "" +
+                    EVENT_ELAPSED_TIME + " TEXT NOT NULL, " + "" +
                     EVENT_IS_DELETED + " TEXT NOT NULL);";
 
     private static final String DROP_EVENT_TABLE =
@@ -146,7 +146,7 @@ public class ItineraryEventsDB {
                 return new ItineraryEvent(
                         cursor.getString(EVENT_TITLE_COL),
                         cursor.getString(EVENT_DESCRIPTION_COL),
-                        cursor.getInt(EVENT_ELAPSED_TIME_COL));
+                        cursor.getString(EVENT_ELAPSED_TIME_COL));
             } catch (Exception e) {
                 Log.d(TAG, "getEventFromCursor: Error " + e.getMessage());
                 return null;
@@ -167,8 +167,8 @@ public class ItineraryEventsDB {
             db.execSQL(CREATE_EVENT_TABLE);
 
             //Insert sample events;
-            db.execSQL("INSERT INTO event(event_title, event_description, event_elapsed, event_deleted) VALUES('Title','Descr',0,'0')"); //TODO comment out
-            db.execSQL("INSERT INTO event(event_title, event_description, event_elapsed, event_deleted) VALUES('Title2','Descr2',15,'0')"); //TODO comment out
+            db.execSQL("INSERT INTO event(event_title, event_description, event_elapsed, event_deleted) VALUES('Title','Descr','00:00','0')"); //TODO comment out
+            db.execSQL("INSERT INTO event(event_title, event_description, event_elapsed, event_deleted) VALUES('Title2','Descr2','00:15','0')"); //TODO comment out
 
         }
 

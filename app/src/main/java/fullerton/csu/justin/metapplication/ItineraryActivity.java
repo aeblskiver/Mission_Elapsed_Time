@@ -38,7 +38,7 @@ public class ItineraryActivity extends AppCompatActivity implements AdapterView.
         ab.setTitle(R.string.activity_itin_title);
 
         // Create events repository
-        eventsRepo = new ItineraryEventRepository(this);
+        eventsRepo = ItineraryEventRepository.getInstance(getApplicationContext());
         new ReadFromDatabase().execute();
     }
 
@@ -101,7 +101,7 @@ public class ItineraryActivity extends AppCompatActivity implements AdapterView.
                 new ArrayList<>();
         for (ItineraryEvent event: events) {
             HashMap<String, String> map = new HashMap<>();
-            map.put("elapsedTime", Integer.toString(event.getElapsedTime()));
+            map.put("elapsedTime", event.getElapsedTime());
             map.put("title", event.getTitle());
             eventData.add(map);
         }
