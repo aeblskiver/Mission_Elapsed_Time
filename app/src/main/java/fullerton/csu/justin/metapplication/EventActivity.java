@@ -25,7 +25,7 @@ public class EventActivity extends AppCompatActivity implements TextView.OnEdito
     TimePicker timePicker;
 
     ItineraryEventRepository eventsRepo;
-    ItineraryEvent event;
+    private ItineraryEvent mEvent;
     int index;
     String elapsedTime;
     private boolean isNew;
@@ -52,7 +52,7 @@ public class EventActivity extends AppCompatActivity implements TextView.OnEdito
             @Override
             public void onTimeChanged(TimePicker timePicker, int hourOfDay, int minute) {
                 newHour = String.format("%02d", hourOfDay);
-                newMinute = String.format("%02d", hourOfDay);
+                newMinute = String.format("%02d", minute);
 
             }
         });
@@ -65,6 +65,7 @@ public class EventActivity extends AppCompatActivity implements TextView.OnEdito
         if (intent.getExtras() != null) {
             index = intent.getIntExtra("index", -1);
             //update display
+            mEvent = eventsRepo.getItem(index);
             updateDisplay();
             isNew = false;
         } else {
@@ -74,11 +75,10 @@ public class EventActivity extends AppCompatActivity implements TextView.OnEdito
     }
 
     private void updateDisplay() {
-        ItineraryEvent event = eventsRepo.getItem(index);
-        editTextTitle.setText(event.getTitle());
-        editTextDescription.setText(event.getDescription());
-        updateTimePicker(event.getElapsedTime());
-
+        mEvent = eventsRepo.getItem(index);
+        editTextTitle.setText(mEvent.getTitle());
+        editTextDescription.setText(mEvent.getDescription());
+        updateTimePicker(mEvent.getElapsedTime());
     }
 
     private void updateTimePicker(String elapsedTime) {
@@ -98,19 +98,7 @@ public class EventActivity extends AppCompatActivity implements TextView.OnEdito
         switch (item.getItemId()) {
             case R.id.menu_save:
                 Toast.makeText(this,"Saving", Toast.LENGTH_SHORT).show();
-                if (isNew) {
-                    eventsRepo.addNewEvent(new ItineraryEvent(
-                            newTitle,
-                            newDescription,
-                            newHour + ":" + newMinute
-                    ));
-                } else
-                {
-                    //update
-                }
-                Intent intent = new Intent(this, ItineraryActivity.class);
-                startActivity(intent);
-                //Update database using newValues
+                saveEventInfo();
                 return true;
             case R.id.menu_discard_changes:
                 Toast.makeText(this,"Discarding", Toast.LENGTH_SHORT).show();
@@ -123,6 +111,33 @@ public class EventActivity extends AppCompatActivity implements TextView.OnEdito
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void saveEventInfo() {
+        if (isNew) {
+            saveNewEvent();
+        } else
+        {
+            saveUpdatedEvent();
+        }
+        Intent intent = new Intent(this, ItineraryActivity.class);
+        startActivity(intent);
+    }
+
+    private void saveUpdatedEvent() {
+        Log.d(TAG, "saveEventInfo: " + mEvent.getId());
+        if (newTitle != null) mEvent.setTitle(newTitle);
+        if (newDescription != null) mEvent.setDescription(newDescription);
+        if (newHour != null || newMinute != null) mEvent.setElapsedTime(newHour + ":" + newMinute);
+        eventsRepo.updateEvent(mEvent);
+    }
+
+    private void saveNewEvent() {
+        eventsRepo.addNewEvent(new ItineraryEvent(
+                newTitle,
+                newDescription,
+                newHour + ":" + newMinute
+        ));
     }
 
     @Override

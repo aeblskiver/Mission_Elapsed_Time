@@ -78,7 +78,7 @@ public class ItineraryEventsDB {
         try {
             this.openReadableDB();
             Cursor cursor = db.query(EVENT_TABLE, null,
-                    where, null, null, null, null); //TODO: Order clause
+                    where, null, null, null, null); //TODO: Order clause? Or oder in Repo?
             ArrayList<ItineraryEvent> events = new ArrayList<>();
 
             while (cursor.moveToNext()) {
@@ -115,6 +115,8 @@ public class ItineraryEventsDB {
     }
 
     public int updateEvent(ItineraryEvent event) {
+        Log.d(TAG, "updating Event with id " + event.getId());
+        Log.d(TAG, event.toString());
         ContentValues cv = new ContentValues();
         cv.put(EVENT_TITLE, event.getTitle());
         cv.put(EVENT_DESCRIPTION, event.getDescription());
@@ -131,6 +133,7 @@ public class ItineraryEventsDB {
              rowCount = db.update(EVENT_TABLE, cv, where, whereArgs);
         } catch (SQLiteException e) {
             Log.d(TAG, "Exception occurred " + e.getMessage());
+            Log.d(TAG, "updateEvent: " + e.getStackTrace());
         } finally {
             this.closeDB();
         }
@@ -144,6 +147,7 @@ public class ItineraryEventsDB {
             try {
 
                 return new ItineraryEvent(
+                        cursor.getInt(EVENT_ID_COL),
                         cursor.getString(EVENT_TITLE_COL),
                         cursor.getString(EVENT_DESCRIPTION_COL),
                         cursor.getString(EVENT_ELAPSED_TIME_COL));

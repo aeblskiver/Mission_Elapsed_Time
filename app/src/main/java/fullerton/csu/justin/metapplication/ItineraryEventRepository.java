@@ -45,7 +45,7 @@ public class ItineraryEventRepository {
         db.insertEvent(event);
     }
 
-    public void updateEvent(int id) {
-
+    public void updateEvent(ItineraryEvent event) {
+        db.updateEvent(event);
     }
 }

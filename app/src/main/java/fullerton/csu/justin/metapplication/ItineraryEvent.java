@@ -24,6 +24,14 @@ public class ItineraryEvent implements Parcelable {
         this.deleted = FALSE;
     }
 
+    public ItineraryEvent(int id, String title, String description, String elapsedTime) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.elapsedTime = elapsedTime;
+        this.deleted = FALSE;
+    }
+
     public ItineraryEvent(Parcel in) {
         this.id = in.readInt();
         this.title = in.readString();
@@ -74,7 +82,13 @@ public class ItineraryEvent implements Parcelable {
 
     @Override
     public String toString() {
-        return title + " " + description;
+        StringBuilder sb = new StringBuilder();
+        sb.append("ID: " ).append(id);
+        sb.append("Title: ").append(title);
+        sb.append("Description: ").append(description);
+        sb.append("Time: ").append(elapsedTime);
+        sb.append("Deleted? ").append(deleted);
+        return sb.toString();
     }
 
     //Parcelable implementation
