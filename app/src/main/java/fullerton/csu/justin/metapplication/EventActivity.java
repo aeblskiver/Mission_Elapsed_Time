@@ -97,20 +97,26 @@ public class EventActivity extends AppCompatActivity implements TextView.OnEdito
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_save:
-                Toast.makeText(this,"Saving", Toast.LENGTH_SHORT).show();
                 saveEventInfo();
                 return true;
             case R.id.menu_discard_changes:
                 Toast.makeText(this,"Discarding", Toast.LENGTH_SHORT).show();
                 //Go back to main activity without saving anything
+                startIntentToMainActivity();
                 return true;
             case R.id.menu_delete:
                 Toast.makeText(this,"Deleting", Toast.LENGTH_SHORT).show();
+                deleteEvent();
+                startIntentToMainActivity();
                 //Delete event (after confirmation) and go back to main activity
                 return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void deleteEvent() {
+        eventsRepo.deleteEvent(mEvent);
     }
 
     private void saveEventInfo() {
@@ -120,6 +126,10 @@ public class EventActivity extends AppCompatActivity implements TextView.OnEdito
         {
             saveUpdatedEvent();
         }
+        startIntentToMainActivity();
+    }
+
+    private void startIntentToMainActivity() {
         Intent intent = new Intent(this, ItineraryActivity.class);
         startActivity(intent);
     }

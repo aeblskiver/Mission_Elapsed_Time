@@ -48,4 +48,9 @@ public class ItineraryEventRepository {
     public void updateEvent(ItineraryEvent event) {
         db.updateEvent(event);
     }
+
+    public void deleteEvent(ItineraryEvent mEvent) {
+        mEvent.setDeleted(ItineraryEvent.TRUE);
+        db.updateEvent(mEvent);
+    }
 }
