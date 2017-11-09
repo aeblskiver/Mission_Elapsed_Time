@@ -157,7 +157,7 @@ public class EventActivity extends AppCompatActivity implements TextView.OnEdito
         {
             setEventTextView(textView);
         }
-        return false;
+        return true;
     }
 
     private void setEventTextView(TextView textView) {
@@ -168,7 +168,6 @@ public class EventActivity extends AppCompatActivity implements TextView.OnEdito
                 break;
             case R.id.editTextDescription:
                 newDescription = textView.getText().toString();
-
                 Log.d(TAG, "set Descr: " + newDescription);
                 break;
         }
