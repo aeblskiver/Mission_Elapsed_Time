@@ -2,6 +2,8 @@ package fullerton.csu.justin.metapplication;
 
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.provider.AlarmClock;
+import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,15 +17,23 @@ import android.widget.SimpleAdapter;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 
 public class ItineraryActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
-    public static final String TAG = "ItinerayActivity";
+    public static final String TAG = "ItineraryActivity";
+    public static final int MILLIS_IN_HOUR = 1000 * 60 * 60;
+    public static final int MILLIS_IN_SECOND = 1000 * 60;
+    public static final int MINUTES_IN_HOUR = 60;
     ItineraryEventRepository eventsRepo;
-    ArrayList<ItineraryEvent> events;
     private ListView itemsListview;
+    private Calendar mCurrentTime;
+    private int mCurrentIntentIndex;
+    private static final int REQUEST_DISMISS = 2;
+    private boolean alarmSet = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,18 +62,94 @@ public class ItineraryActivity extends AppCompatActivity implements AdapterView.
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_new:
-                Toast.makeText(this,"New item",Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(this, EventActivity.class);
                 startActivity(intent);
                 return true;
             case R.id.menu_set_alarms:
-                Toast.makeText(this,"Alarm set",Toast.LENGTH_SHORT).show();
+                if (!alarmSet) {
+                    alarmSet = true;
+                    setAlarms();
+                }
                 return true;
             case R.id.menu_cancel_alarm:
-                Toast.makeText(this,"Canceled Alarms",Toast.LENGTH_SHORT).show();
+                if (alarmSet) {
+                    alarmSet = false;
+                    cancelAlarms();
+                }
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void cancelAlarms() {
+        if (eventsRepo.getSize() > 0) {
+            mCurrentIntentIndex = 0;
+                Intent intent = getIntentForDismiss(eventsRepo.getItem(mCurrentIntentIndex));
+                startActivityForResult(intent, ++mCurrentIntentIndex);
+            }
+        }
+
+    @NonNull
+    private Intent getIntentForDismiss(EventEntity item) {
+        return new Intent(AlarmClock.ACTION_DISMISS_ALARM)
+                .putExtra(AlarmClock.EXTRA_SKIP_UI, true)
+                .putExtra(AlarmClock.EXTRA_ALARM_SEARCH_MODE, AlarmClock.ALARM_SEARCH_MODE_LABEL)
+                .putExtra(AlarmClock.EXTRA_MESSAGE, eventsRepo.getItem(mCurrentIntentIndex).getTitle());
+    }
+
+
+    private void setAlarms() {
+        if (eventsRepo.getEvents().size() > 0) {
+            mCurrentTime = new GregorianCalendar();
+            mCurrentIntentIndex = 0;
+            EventEntity firstItem = eventsRepo.getItem(mCurrentIntentIndex);
+            Intent intent = getIntentForNewAlarm(firstItem);
+            mCurrentIntentIndex++;
+            startActivityForResult(intent, mCurrentIntentIndex);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (alarmSet && requestCode < eventsRepo.getSize()) {
+            Log.d(TAG, "Request code: " + requestCode);
+            Intent intent = getIntentForNewAlarm(eventsRepo.getItem(requestCode));
+            requestCode++;
+            this.startActivityForResult(intent, requestCode);
+        }
+        else if (!alarmSet && requestCode < eventsRepo.getSize()) {
+            Log.d(TAG, "Canceled through " + requestCode + " times.");
+            Intent intent = getIntentForDismiss(eventsRepo.getItem(requestCode));
+            requestCode++;
+            this.startActivityForResult(intent, requestCode);
+        } else {
+            onResume();
+             }
+        }
+
+
+    @NonNull
+    private Intent getIntentForNewAlarm(EventEntity item) {
+        int alarmHour = getHourForAlarm(item);
+        int alarmMinute = getMinutesForAlarm(item);
+        Log.d(TAG, "Time set for: " + alarmHour + ":" + alarmMinute);
+        Intent intent = new Intent(AlarmClock.ACTION_SET_ALARM)
+                .putExtra(AlarmClock.EXTRA_HOUR, alarmHour)
+                .putExtra(AlarmClock.EXTRA_MINUTES, alarmMinute)
+                .putExtra(AlarmClock.EXTRA_MESSAGE, item.getTitle())
+                .putExtra(AlarmClock.EXTRA_SKIP_UI, true)
+                .putExtra(AlarmClock.EXTRA_ALARM_SEARCH_MODE, AlarmClock.ALARM_SEARCH_MODE_LABEL);
+        return intent;
+    }
+
+    private int getMinutesForAlarm(EventEntity item) {
+        return (item.getTimeOffset() / MILLIS_IN_SECOND - ((item.getTimeOffset() / MILLIS_IN_HOUR) * MINUTES_IN_HOUR)
+                + mCurrentTime.get(GregorianCalendar.MINUTE)) % MINUTES_IN_HOUR;
+    }
+
+    private int getHourForAlarm(EventEntity item) {
+        return ((item.getTimeOffset() / MILLIS_IN_HOUR) + mCurrentTime.get(GregorianCalendar.HOUR_OF_DAY)) % 24;
     }
 
     @Override
@@ -90,7 +176,7 @@ public class ItineraryActivity extends AppCompatActivity implements AdapterView.
     }
 
     private void updateDisplay() {
-        events = eventsRepo.getEvents();
+        List<EventEntity> events = eventsRepo.getEvents();
         if (events == null) {
             Toast.makeText(this, "No events found", Toast.LENGTH_SHORT).show();
         } else {
@@ -99,9 +185,16 @@ public class ItineraryActivity extends AppCompatActivity implements AdapterView.
 
         ArrayList<HashMap<String, String>> eventData =
                 new ArrayList<>();
-        for (ItineraryEvent event: events) {
+        //String elapsedTime = String.format("%02d", );
+        for (EventEntity event: events) {
+            long minutes = event.getTimeOffset() / (1000 * 60);
+            Log.d(TAG, "updateDisplay: Milliseconds= " + event.getTimeOffset());
+            Log.d(TAG, "updateDisplay: Minutes= " + minutes);
+            long hours = minutes / 60;
+            String hourFormat = String.format("%02d", hours);
+            String minuteFormat = String.format("%02d", (minutes - (hours * 60)));
             HashMap<String, String> map = new HashMap<>();
-            map.put("elapsedTime", event.getElapsedTime());
+            map.put("elapsedTime", hourFormat + ":" + minuteFormat);
             map.put("title", event.getTitle());
             eventData.add(map);
         }

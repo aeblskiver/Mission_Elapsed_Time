@@ -1,12 +1,10 @@
 package fullerton.csu.justin.metapplication;
 
+import android.arch.persistence.room.Room;
 import android.content.Context;
-import android.os.AsyncTask;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * Created by Justin on 11/3/2017.
@@ -14,8 +12,8 @@ import java.util.TimerTask;
 
 public class ItineraryEventRepository {
     private static ItineraryEventRepository instance = null;
-    private ArrayList<ItineraryEvent> events;
-    ItineraryEventsDB db;
+    private List<EventEntity> events;
+    AppDatabase db;
 
     public static ItineraryEventRepository getInstance(Context context) {
         if (instance == null) {
@@ -26,31 +24,35 @@ public class ItineraryEventRepository {
 
     private ItineraryEventRepository(Context context) {
         this.events = new ArrayList<>();
-        db = new ItineraryEventsDB(context);
+        db = Room.databaseBuilder(context, AppDatabase.class, "events").build();
+    }
+
+    public int getSize() {
+        return events.size();
     }
 
     public void loadEventsFromDB() {
-        events = db.getEvents();
+        events = db.eventDao().loadAllEvents();
     }
 
-    public ArrayList<ItineraryEvent> getEvents() {
+    public List<EventEntity> getEvents() {
         return events;
     }
 
-    public ItineraryEvent getItem(int index) {
+    public EventEntity getItem(int index) {
         return events.get(index);
     }
 
-    public void addNewEvent(ItineraryEvent event) {
-        db.insertEvent(event);
+    public void addNewEvent(EventEntity event) {
+        db.eventDao().insertEvent(event);
     }
 
-    public void updateEvent(ItineraryEvent event) {
-        db.updateEvent(event);
+    public void updateEvent(EventEntity event) {
+        db.eventDao().updateEvent(event);
     }
 
-    public void deleteEvent(ItineraryEvent mEvent) {
-        mEvent.setDeleted(ItineraryEvent.TRUE);
-        db.updateEvent(mEvent);
+    public void deleteEvent(EventEntity mEvent) {
+        mEvent.setDeleted(EventEntity.TRUE);
+        db.eventDao().updateEvent(mEvent);
     }
 }

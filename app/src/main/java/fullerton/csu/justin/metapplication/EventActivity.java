@@ -5,6 +5,7 @@ import android.icu.text.SimpleDateFormat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TimeUtils;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,17 +16,20 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import java.util.GregorianCalendar;
+import java.util.concurrent.TimeUnit;
 
 public class EventActivity extends AppCompatActivity implements TextView.OnEditorActionListener {
 
     public static final String TAG = "EventActivity";
+    public static final int MILLIS_IN_MINUTES = 1000 * 60;
+    public static final int MINUTES_IN_HOUR = 60;
 
     EditText editTextTitle;
     EditText editTextDescription;
     TimePicker timePicker;
 
     ItineraryEventRepository eventsRepo;
-    private ItineraryEvent mEvent;
+    private EventEntity mEvent;
     int index;
     String elapsedTime;
     private boolean isNew;
@@ -71,6 +75,8 @@ public class EventActivity extends AppCompatActivity implements TextView.OnEdito
         } else {
             //create new event
             isNew = true;
+            timePicker.setMinute(0);
+            timePicker.setHour(0);
         }
     }
 
@@ -78,13 +84,14 @@ public class EventActivity extends AppCompatActivity implements TextView.OnEdito
         mEvent = eventsRepo.getItem(index);
         editTextTitle.setText(mEvent.getTitle());
         editTextDescription.setText(mEvent.getDescription());
-        updateTimePicker(mEvent.getElapsedTime());
+        updateTimePicker(mEvent.getTimeOffset());
     }
 
-    private void updateTimePicker(String elapsedTime) {
-        String[] split = elapsedTime.split(":");
-        timePicker.setHour(Integer.parseInt(split[0]));
-        timePicker.setMinute(Integer.parseInt(split[1]));
+    private void updateTimePicker(int elapsedTime) {
+        long minutes = elapsedTime / MILLIS_IN_MINUTES;
+        long hours = minutes / MINUTES_IN_HOUR;
+        timePicker.setHour((int) hours);
+        timePicker.setMinute((int) (minutes  - (hours * MINUTES_IN_HOUR)));
     }
 
     @Override
@@ -116,7 +123,11 @@ public class EventActivity extends AppCompatActivity implements TextView.OnEdito
     }
 
     private void deleteEvent() {
-        eventsRepo.deleteEvent(mEvent);
+        new Thread(new Runnable() {
+            public void run() {
+                eventsRepo.deleteEvent(mEvent);
+            }
+        }).start();
     }
 
     private void saveEventInfo() {
@@ -138,16 +149,30 @@ public class EventActivity extends AppCompatActivity implements TextView.OnEdito
         Log.d(TAG, "saveEventInfo: " + mEvent.getId());
         if (newTitle != null) mEvent.setTitle(newTitle);
         if (newDescription != null) mEvent.setDescription(newDescription);
-        if (newHour != null || newMinute != null) mEvent.setElapsedTime(newHour + ":" + newMinute);
-        eventsRepo.updateEvent(mEvent);
+        if (newHour != null || newMinute != null) mEvent.setTimeOffset(getTimeOffsetInMillis());
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                eventsRepo.updateEvent(mEvent);
+            }
+        }).start();
+    }
+
+    private int getTimeOffsetInMillis() {
+        return (int) TimeUnit.HOURS.toMillis(timePicker.getHour())
+                    + (int) TimeUnit.MINUTES.toMillis(timePicker.getMinute());
     }
 
     private void saveNewEvent() {
-        eventsRepo.addNewEvent(new ItineraryEvent(
-                newTitle,
-                newDescription,
-                newHour + ":" + newMinute
-        ));
+        new Thread(new Runnable() {
+            public void run() {
+                eventsRepo.addNewEvent(new EventEntity(
+                        newTitle,
+                        newDescription,
+                        getTimeOffsetInMillis()
+                ));
+            }
+        }).start();
     }
 
     @Override
