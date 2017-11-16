@@ -29,7 +29,6 @@ public class EventActivity extends AppCompatActivity implements TextView.OnEdito
     ItineraryEventRepository eventsRepo;
     private EventEntity mEvent;
     int index;
-    String elapsedTime;
     private boolean isNew;
     private String newTitle;
     private String newDescription;
@@ -200,11 +199,11 @@ public class EventActivity extends AppCompatActivity implements TextView.OnEdito
     @Override
     public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
 
-        if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_UNSPECIFIED)
+        if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT || actionId == EditorInfo.IME_ACTION_UNSPECIFIED)
         {
             setEventTextView(textView);
         }
-        return true;
+        return false;
     }
 
     private void setEventTextView(TextView textView) {

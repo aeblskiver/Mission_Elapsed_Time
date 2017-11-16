@@ -1,13 +1,12 @@
 package fullerton.csu.justin.metapplication;
 
 import android.content.Intent;
-import android.content.res.Resources;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.provider.AlarmClock;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -82,6 +81,18 @@ public class ItineraryActivity extends AppCompatActivity implements AdapterView.
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean("alarmSet", alarmSet);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        alarmSet = savedInstanceState.getBoolean("alarmSet", false);
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
     private void cancelAlarms() {
         if (eventsRepo.getSize() > 0) {
             mCurrentIntentIndex = 0;
@@ -134,6 +145,8 @@ public class ItineraryActivity extends AppCompatActivity implements AdapterView.
     private Intent getIntentForNewAlarm(EventEntity item) {
         int alarmHour = getHourForAlarm(item);
         int alarmMinute = getMinutesForAlarm(item);
+        if (item.getTimeOffset() == 0)
+            alarmMinute++; //Add a minute so it doesn't set alarm to the next day
         Log.d(TAG, "Time set for: " + alarmHour + ":" + alarmMinute);
         Intent intent = new Intent(AlarmClock.ACTION_SET_ALARM)
                 .putExtra(AlarmClock.EXTRA_HOUR, alarmHour)
