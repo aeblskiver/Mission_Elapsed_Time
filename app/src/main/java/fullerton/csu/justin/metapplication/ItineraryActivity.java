@@ -1,6 +1,7 @@
 package fullerton.csu.justin.metapplication;
 
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.provider.AlarmClock;
 import android.support.annotation.NonNull;

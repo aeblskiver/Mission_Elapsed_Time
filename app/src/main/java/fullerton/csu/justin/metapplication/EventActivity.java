@@ -1,11 +1,10 @@
 package fullerton.csu.justin.metapplication;
 
 import android.content.Intent;
-import android.icu.text.SimpleDateFormat;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.TimeUtils;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,7 +14,6 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
-import java.util.GregorianCalendar;
 import java.util.concurrent.TimeUnit;
 
 public class EventActivity extends AppCompatActivity implements TextView.OnEditorActionListener {
@@ -104,7 +102,9 @@ public class EventActivity extends AppCompatActivity implements TextView.OnEdito
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_save:
-                saveEventInfo();
+                if (editTextTitle.getText() != null) {
+                    saveEventInfo();
+                }
                 return true;
             case R.id.menu_discard_changes:
                 Toast.makeText(this,"Discarding", Toast.LENGTH_SHORT).show();
@@ -150,12 +150,21 @@ public class EventActivity extends AppCompatActivity implements TextView.OnEdito
         if (newTitle != null) mEvent.setTitle(newTitle);
         if (newDescription != null) mEvent.setDescription(newDescription);
         if (newHour != null || newMinute != null) mEvent.setTimeOffset(getTimeOffsetInMillis());
-        new Thread(new Runnable() {
+
+        AsyncTask<Void, Void, Void> task = new AsyncTask<Void, Void, Void>() {
             @Override
-            public void run() {
+            protected Void doInBackground(Void... voids) {
                 eventsRepo.updateEvent(mEvent);
+                return null;
             }
-        }).start();
+        };
+        task.execute();
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                eventsRepo.updateEvent(mEvent);
+//            }
+//        }).start();
     }
 
     private int getTimeOffsetInMillis() {
@@ -164,15 +173,28 @@ public class EventActivity extends AppCompatActivity implements TextView.OnEdito
     }
 
     private void saveNewEvent() {
-        new Thread(new Runnable() {
-            public void run() {
+        AsyncTask<Void,Void,Void> task = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
                 eventsRepo.addNewEvent(new EventEntity(
                         newTitle,
                         newDescription,
                         getTimeOffsetInMillis()
                 ));
+                return null;
             }
-        }).start();
+        };
+
+        task.execute();
+//        new Thread(new Runnable() {
+//            public void run() {
+//                eventsRepo.addNewEvent(new EventEntity(
+//                        newTitle,
+//                        newDescription,
+//                        getTimeOffsetInMillis()
+//                ));
+//            }
+//        }).start();
     }
 
     @Override

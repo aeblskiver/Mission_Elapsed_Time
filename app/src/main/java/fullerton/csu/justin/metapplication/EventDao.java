@@ -15,7 +15,7 @@ import java.util.List;
 
 @Dao
 public interface EventDao {
-    @Query("SELECT * FROM events WHERE deleted=0")
+    @Query("SELECT * FROM events WHERE deleted=0 ORDER BY timeOffSet")
     public List<EventEntity> loadAllEvents();
 
     @Query("SELECT * FROM events WHERE id = :search")
